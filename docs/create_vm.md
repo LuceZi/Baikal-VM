@@ -77,13 +77,13 @@ sh /mnt/shared/clean.sh
 VM 關閉後，在主機的 `~/baikal-appliance/workspace` 目錄執行映像轉檔。輸出檔會放在專案根目錄：
 
 ```sh
-qemu-img convert -O qcow2 -c baikal-base.qcow2 ../baikal-appliance-v0.13.0.qcow2
-ls -lh ../baikal-appliance-v0.13.0.qcow2
+qemu-img convert -O qcow2 -c baikal-base.qcow2 ./baikal-appliance-v0.13.0.qcow2
+ls -lh ./baikal-appliance-v0.13.0.qcow2
 ```
 
 需要 gzip 壓縮以供下載時，可再執行：
 
 ```sh
-gzip -k ../baikal-appliance-v0.13.0.qcow2
-ls -lh ../baikal-appliance-v0.13.0.qcow2.gz
+gzip -k ./baikal-appliance-v0.13.0.qcow2
+ls -lh ./baikal-appliance-v0.13.0.qcow2.gz
 ```
