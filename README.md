@@ -1,70 +1,69 @@
-
 # Baikal Appliance
 
-Baikal CalDAV/CardDAV appliance，以 Alpine Linux 與 QCOW2 磁碟映像提供，可匯入 Proxmox VE 或其他支援 QCOW2 的虛擬化平台。
+A Baikal CalDAV/CardDAV appliance based on Alpine Linux and distributed as a QCOW2 disk image. It can be imported into Proxmox VE or another virtualization platform that supports QCOW2.
 
-## 功能
+## Features
 
-- Nginx、PHP-FPM 與 Baikal
-- Avahi mDNS，可透過 `baikal.local` 連線（用戶端網路需支援 mDNS）
+- Nginx, PHP-FPM, and Baikal
+- Avahi mDNS, accessible at `baikal.local` (client networks must support mDNS)
 - QEMU Guest Agent
 
-## 使用預建映像
+## Use the Prebuilt Image
 
-以下步驟假設你已取得 `baikal-appliance-v0.13.0.qcow2`。若要自行安裝，請參閱下方的「從頭安裝」。
+These instructions assume that you have obtained `baikal-appliance-v0.13.0.qcow2`. To build the image yourself, see [Build from Source](#build-from-source).
 
-在 Proxmox VE 匯入映像：
+To import the image into Proxmox VE:
 
-- 建立 VM 並記下 VM ID；建議使用 VirtIO 網路介面，並連接可上網的 bridge。
-- 將映像上傳至 Proxmox 主機，執行以下命令，並替換 VM ID、映像路徑及儲存區名稱：
+- Create a VM and note its VM ID. A VirtIO network interface connected to an internet-enabled bridge is recommended.
+- Upload the image to the Proxmox host and run the following command, replacing the VM ID, image path, and storage name:
 
 ```sh
 qm importdisk <VMID> baikal-appliance-v0.13.0.qcow2 <STORAGE>
 ```
 
-- 在 VM 的 Hardware 將匯入後的 Unused Disk 加入為磁碟，設定開機順序；在 Options 啟用 QEMU Guest Agent。
-- 啟動 VM，從主控台登入並完成初始設定。
+- In the VM's Hardware settings, add the imported Unused Disk and configure the boot order. Enable QEMU Guest Agent in the Options settings.
+- Start the VM, log in through the console, and complete the initial setup.
 
-本映像已安裝 QEMU Guest Agent 並設為開機啟動；仍須在 Proxmox VE 的 VM 選項中啟用此功能。
+The image includes QEMU Guest Agent and enables it at boot. You must also enable the agent in the VM's Proxmox VE options.
 
-## 初次設定
+## Initial Setup
 
-- 系統帳號：`root`
-- 預設密碼：空白
+- System account: `root`
+- Default password: empty
 
-映像的 root 預設密碼為空。請只在隔離的初次設定環境使用；登入後立即執行 `passwd` 設定強密碼。在確認存取安全前，不要將 VM 暴露於不受信任的網路。安裝腳本不會安裝或啟用 SSH，請使用虛擬化平台的主控台。
+The image has an empty default root password. Use it only in an isolated environment for initial setup. After logging in, immediately set a strong password by running `passwd`. Do not expose the VM to untrusted networks until you have secured access. The installation script does not install or enable SSH, so use the virtualization platform's console.
 
-VM 取得網路位址後，使用瀏覽器開啟 `http://<VM-IP>/` 完成 Baikal 初始設定。預設主機名稱為 `baikal`；用戶端網路支援 mDNS 時，也可開啟 `http://baikal.local/`。
+Once the VM has an IP address, open `http://<VM-IP>/` in a browser to complete Baikal's initial setup. The default hostname is `baikal`; if the client network supports mDNS, you can also use `http://baikal.local/`.
 
-## 從頭安裝
+## Build from Source
 
-若要自行建置映像，請依照[建立虛擬機](docs/create_vm.md)操作。在 Alpine Linux VM 中以 root 執行安裝腳本：
+To build the image yourself, follow the [VM creation guide](docs/create_vm.md). In the Alpine Linux VM, run the installation script as root:
 
 ```sh
 sh /mnt/shared/full_install.sh
 ```
 
-可選擇自訂 VM 主機名稱；支援 mDNS 的網路通常可透過 `<名稱>.local` 連線：
+You can optionally choose a custom VM hostname. On networks that support mDNS, the VM will typically be reachable at `<hostname>.local`:
 
 ```sh
 BAIKAL_HOSTNAME=calendar sh /mnt/shared/full_install.sh
 ```
 
-安裝腳本預設從 Baikal 官方 GitHub Releases 下載版本 `0.13.0`，並設定 Nginx、PHP-FPM、Avahi 和 QEMU Guest Agent。建置完成後可從 VM IP 或主機名稱開啟網頁，完成 Baikal 初始設定。
+By default, the installation script downloads Baikal version `0.13.0` from the official Baikal GitHub Releases and configures Nginx, PHP-FPM, Avahi, and QEMU Guest Agent. After the build, open the VM's IP address or hostname in a browser to complete Baikal's initial setup.
 
-日常管理、SSH 設定及手動安裝方式請參閱[安裝與管理 Baikal](docs/manage_baikal.md)。
+For day-to-day administration, SSH setup, and manual installation, see [Install and Manage Baikal](docs/manage_baikal.md).
 
-`scripts/clean.sh` 僅供製作映像前清理使用：會清除暫存檔與日誌、填滿剩餘磁碟空間，最後關閉 VM。它會停止服務並關機，請勿在日常運作中的 VM 執行。
+`scripts/clean.sh` is only for cleaning the VM before creating an image. It removes temporary files and logs, fills the remaining free disk space, and then shuts down the VM. It also stops services; do not run it on a VM in regular use.
 
-## 上游來源與致謝
+## Upstream Projects and Acknowledgments
 
-本專案使用並感謝以下上游專案及其維護者、貢獻者：
+This project uses and acknowledges the following upstream projects, their maintainers, and contributors:
 
-- [Alpine Linux](https://www.alpinelinux.org/)：提供本 appliance 使用的 Linux 發行版。可從[官方套件索引](https://pkgs.alpinelinux.org/)查詢套件，並在 [Alpine aports 原始碼庫](https://gitlab.alpinelinux.org/alpine/aports)查看套件建置配方。
-- [Baïkal](https://github.com/sabre-io/Baikal)：由 sabre-io 維護的 CalDAV/CardDAV 伺服器。本專案安裝 Baïkal 0.13.0，來源碼與版本檔案請見 [Baïkal 原始碼庫](https://github.com/sabre-io/Baikal)及 [0.13.0 發行頁](https://github.com/sabre-io/Baikal/releases/tag/0.13.0)。
+- [Alpine Linux](https://www.alpinelinux.org/): the Linux distribution used by this appliance. Package information is available in the [official package index](https://pkgs.alpinelinux.org/), and package build recipes are available in the [Alpine aports repository](https://gitlab.alpinelinux.org/alpine/aports).
+- [Baïkal](https://github.com/sabre-io/Baikal): a CalDAV/CardDAV server maintained by sabre-io. This project installs Baïkal 0.13.0. See the [Baïkal source repository](https://github.com/sabre-io/Baikal) and the [0.13.0 release page](https://github.com/sabre-io/Baikal/releases/tag/0.13.0) for source code and release files.
 
-本專案負責 appliance 的整合與設定；上游軟體仍由各自的作者及維護團隊持有，並依其各自授權發行。本專案與 Alpine Linux 或 Baïkal 維護團隊沒有隸屬關係。散布包含上游軟體的映像時，請一併確認各元件的授權及聲明要求。
+This project is responsible for integrating and configuring the appliance. Upstream software remains the property of its respective authors and maintainers and is distributed under its own license. This project is not affiliated with the Alpine Linux or Baïkal maintainers. When redistributing an image that includes upstream software, make sure to comply with the applicable licenses and notice requirements for each component.
 
-## 授權
+## License
 
-本 repository 附有 GNU GPL 第 3 版授權，詳見 [LICENSE](LICENSE)。發佈包含 Baikal、Alpine Linux 或其他套件的映像前，也請確認並附上各上游元件適用的授權與聲明。
+This repository includes the GNU General Public License, version 3. See [LICENSE](LICENSE). Before distributing an image that includes Baikal, Alpine Linux, or other packages, also verify and include the applicable licenses and notices for those upstream components.
